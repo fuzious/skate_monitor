@@ -23,7 +23,7 @@ async function checkBlockAndExplorer() {
 
         // Check RPC block production
         if (currentTimestamp - latestBlock.timestamp > 60) {
-            await sendToSlack("ALERT_RPC: <@S06TSCPGBDW> No new block in the last minute!");
+            await sendToSlack("ALERT_RPC: <!subteam^S06TSCPGBDW|engineering> No new block in the last minute!");
         } else {
             console.log(latestBlock.number +" is fetched from RPC");
         }
@@ -34,7 +34,7 @@ async function checkBlockAndExplorer() {
         // Check block on Explorer
         await checkBlockOnExplorer(tenMinutesAgoBlock);
     } catch (error) {
-        await sendToSlack(`Error in checkBlockAndExplorer <@S06TSCPGBDW> : ${error.message}`);
+        await sendToSlack(`Error in checkBlockAndExplorer <!subteam^S06TSCPGBDW|engineering> : ${error.message}`);
     }
 }
 
@@ -46,10 +46,10 @@ async function checkBlockOnExplorer(blockNumber) {
         if (response.data && response.data.pageProps && response.data.pageProps.height_or_hash === blockNumber.toString()) {
             console.log(`Block number ${blockNumber} is present on the explorer.`);
         } else {
-            await sendToSlack(`ALERT_EXPLORER: <@S06TSCPGBDW> Block number ${blockNumber} is not present on the explorer. The explorer might be down!`);
+            await sendToSlack(`ALERT_EXPLORER: <!subteam^S06TSCPGBDW|engineering> Block number ${blockNumber} is not present on the explorer. The explorer might be down!`);
         }
     } catch (error) {
-        await sendToSlack(`ALERT_EXPLORER: <@S06TSCPGBDW> Error checking block number ${blockNumber} on the explorer: ${error.message}`);
+        await sendToSlack(`ALERT_EXPLORER: <!subteam^S06TSCPGBDW|engineering> Error checking block number ${blockNumber} on the explorer: ${error.message}`);
     }
 }
 
@@ -66,12 +66,12 @@ async function checkAddressBalances() {
             const rpcProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
             const balance = await rpcProvider.getBalance(address);
             if (balance.lt(threshold)) { // Checks if balance is less than the threshold
-                await sendToSlack(`ALERT_BALANCE: <@S06TSCPGBDW> Address ${address} has a balance below the threshold!`);
+                await sendToSlack(`ALERT_BALANCE: <!subteam^S06TSCPGBDW|engineering> Address ${address} has a balance below the threshold!`);
             } else {
                 console.log(`Address ${address} balance is above the threshold.`);
             }
         } catch (error) {
-            await sendToSlack(`Error checking balance for address ${address} <@S06TSCPGBDW>: ${error.message}`);
+            await sendToSlack(`Error checking balance for address ${address} <!subteam^S06TSCPGBDW|engineering> : ${error.message}`);
         }
     }
 }
@@ -88,7 +88,7 @@ function scheduleChecks() {
                 await checkBlockAndExplorer();
                 await checkAddressBalances();
             } catch (error) {
-                sendToSlack(`Some error occurred <@S06TSCPGBDW> ${error.message}`).catch(console.error);
+                sendToSlack(`Some error occurred <!subteam^S06TSCPGBDW|engineering> ${error.message}`).catch(console.error);
             }
         }, 30 * 1000);
 
@@ -109,7 +109,7 @@ function scheduleChecks() {
         }, next6AM.getTime() - now.getTime());
 
     } catch (error) {
-        sendToSlack(`Some error occurred <@S06TSCPGBDW> ${error.message}`).catch(console.error);
+        sendToSlack(`Some error occurred <!subteam^S06TSCPGBDW|engineering> ${error.message}`).catch(console.error);
     }
 }
 
