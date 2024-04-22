@@ -41,7 +41,7 @@ async function checkBlockAndExplorer() {
 // Check if a specific block number is present on the explorer
 async function checkBlockOnExplorer(blockNumber) {
     try {
-        const response = await axios.get(`https://nolliescan.skatechain.org/_next/data/7vMpbD-4IZPkUKCoFusKU/block/${blockNumber}.json?height_or_hash=${blockNumber}`);
+        const response = await axios.get(`https://nolliescan.skatechain.org/_next/data/45MzuHt5jOhug6Y026GDj/block/${blockNumber}.json?height_or_hash=${blockNumber}`);
 
         if (response.data && response.data.pageProps && response.data.pageProps.height_or_hash === blockNumber.toString()) {
             console.log(`Block number ${blockNumber} is present on the explorer.`);
