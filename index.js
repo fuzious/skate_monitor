@@ -41,9 +41,9 @@ async function checkBlockAndExplorer() {
 // Check if a specific block number is present on the explorer
 async function checkBlockOnExplorer(blockNumber) {
     try {
-        const response = await axios.get(`https://nolliescan.skatechain.org/_next/data/45MzuHt5jOhug6Y026GDj/block/${blockNumber}.json?height_or_hash=${blockNumber}`);
-
-        if (response.data && response.data.pageProps && response.data.pageProps.height_or_hash === blockNumber.toString()) {
+        const response = await axios.get(process.env.BLOCKEXPLORER_URL.replace('{blockNumber}', blockNumber));
+        console.log(response.data)
+        if (response.data && response.data.pageProps && response.data.pageProps.query.height_or_hash === blockNumber.toString()) {
             console.log(`Block number ${blockNumber} is present on the explorer.`);
         } else {
             await sendToSlack(`ALERT_EXPLORER: <!subteam^S06TSCPGBDW|engineering> Block number ${blockNumber} is not present on the explorer. The explorer might be down!`);
@@ -56,7 +56,7 @@ async function checkBlockOnExplorer(blockNumber) {
 const addressThresholdMap = {
     "0x73C076b1008323C76F8aa7ACD82CdBD0e854Fd23": { threshold: ethers.utils.parseEther("2.0"), rpcUrl: process.env.ETH_RPC_URL },
     "0x4d592Ec49dAd1c13839c4Fb2010b8ba3EFF5e613": { threshold: ethers.utils.parseEther("2.0"), rpcUrl: process.env.ETH_RPC_URL },
-    "0x077775f83553FbCDF589Ee3A62f81a39bA0fA65E": { threshold: ethers.utils.parseEther("2.0"), rpcUrl: process.env.NOLLIE_RPC_URL },
+    "0x077775f83553FbCDF589Ee3A62f81a39bA0fA65E": { threshold: ethers.utils.parseEther("2.0"), rpcUrl: process.env.NOLLIE_RPC_URL }, //faucet
 };
 
 
