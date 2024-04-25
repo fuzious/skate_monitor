@@ -105,7 +105,6 @@ function scheduleChecks() {
             try {
                 await checkBlockAndExplorer();
                 await checkAddressBalances();
-                await checkRebelsCurrentId();
             } catch (error) {
                 sendToSlack(`Some error occurred <!subteam^S06TSCPGBDW|engineering> ${error.message}`).catch(console.error);
             }
