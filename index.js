@@ -43,17 +43,25 @@ async function checkBlockAndExplorer() {
     }
 }
 
-// Check if a specific block number is present on the explorer
+let alertSent = false;
+
 async function checkBlockOnExplorer(blockNumber) {
     try {
         const response = await axios.get(process.env.BLOCKEXPLORER_URL.replace('{blockNumber}', blockNumber));
         if (response.data && response.data.pageProps && response.data.pageProps.query.height_or_hash === blockNumber.toString()) {
             console.log(`Block number ${blockNumber} is present on the explorer.`);
+            alertSent = false;  // Reset flag when block is found
         } else {
-            await sendToSlack(`ALERT_EXPLORER: <!subteam^S06TSCPGBDW|engineering> Block number ${blockNumber} is not present on the explorer. The explorer might be down!`);
+            if (!alertSent) {
+                await sendToSlack(`ALERT_EXPLORER: <!subteam^S06TSCPGBDW|engineering> Block number ${blockNumber} is not present on the explorer. The explorer might be down!`);
+                alertSent = true;
+            }
         }
     } catch (error) {
-        await sendToSlack(`ALERT_EXPLORER: <!subteam^S06TSCPGBDW|engineering> Error checking block number ${blockNumber} on the explorer: ${error.message}`);
+        if (!alertSent) {
+            await sendToSlack(`ALERT_EXPLORER: <!subteam^S06TSCPGBDW|engineering> Error checking block number ${blockNumber} on the explorer: ${error.message}`);
+            alertSent = true;
+        }
     }
 }
 
@@ -64,18 +72,31 @@ const addressThresholdMap = {
 };
 
 
+const alertState = {};  // Object to keep track of alerts for each address
+
 async function checkAddressBalances() {
     for (const [address, { threshold, rpcUrl }] of Object.entries(addressThresholdMap)) {
         try {
             const rpcProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
             const balance = await rpcProvider.getBalance(address);
             if (balance.lt(threshold)) { // Checks if balance is less than the threshold
-                await sendToSlack(`ALERT_BALANCE: <!subteam^S06TSCPGBDW|engineering> Address ${address} has a balance below the threshold!`);
+                if (!alertState[address]) { // Check if alert has not been sent
+                    await sendToSlack(`ALERT_BALANCE: <!subteam^S06TSCPGBDW|engineering> Address ${address} has a balance below threshold!`);
+                    alertState[address] = true; // Mark as alert sent
+                }
             } else {
-                console.log(`Address ${address} balance is above the threshold.`);
+                if (alertState[address]) {
+                    console.log(`Address ${address} balance is now above the threshold. Alert state reset.`);
+                    alertState[address] = false; // Reset alert state when balance recovers
+                } else {
+                    console.log(`Address ${address} balance is above the threshold.`);
+                }
             }
         } catch (error) {
-            await sendToSlack(`Error checking balance for address ${address} <!subteam^S06TSCPGBDW|engineering> : ${error.message}`);
+            if (!alertState[address]) { // Check if error alert has not been sent
+                await sendToSlack(`Error checking balance for address ${address} <!subteam^S06TSCPGBDW|engineering>: ${error.message}`);
+                alertState[address] = true; // Mark as alert sent to avoid repeating the error message
+            }
         }
     }
 }
